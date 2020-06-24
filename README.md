@@ -1,1 +1,1 @@
-# Proteome_Rim15_Quiescence
+# Regulation of rim15 during cellular quiescence
