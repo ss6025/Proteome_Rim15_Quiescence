@@ -359,7 +359,6 @@ ratio_normed <- phosphosites %>%
   dplyr::select(Proteins, id, `Positions within proteins`,`Leading proteins`,`Protein names`,`Gene names`,`Fasta headers`, `Localization prob`,`Sequence window`, contains("Ratio")) %>%
   dplyr::select(Proteins, id, `Sequence window`, `Positions within proteins`,`Leading proteins`,`Protein names`,`Gene names`,`Fasta headers`, `Localization prob`, contains("phospho")) %>%
   dplyr::select(Proteins, id, `Positions within proteins`,`Leading proteins`,`Protein names`,`Gene names`,`Fasta headers`, `Localization prob`,`Sequence window`, contains("normalized")) %>%
-  #dplyr::select(Proteins, id, `Positions within proteins`,`Leading proteins`,`Protein names`,`Gene names`,`Fasta headers`, `Localization prob`, matches("___")) %>%
   dplyr::select(-matches("_N_")) %>%
   dplyr::select(-matches("___")) %>%
   mutate(id = factor(id)) %>%
@@ -577,7 +576,7 @@ annotation_col <- names(df)[-1] %>% as.tibble() %>%
   separate(value, c("nutrient","genotype","samplingTime","rep"), sep = "_", remove = FALSE) %>%
   column_to_rownames(var = "value")
 
-pdf("./pSite_ratio_normed_heat_all.pdf", width = 13, height = 13)
+pdf("./plots/pSite_ratio_normed_heat_all.pdf", width = 13, height = 13)
 pheatmap(df[,-1] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10, name = "RdYlBu")))(length(breaksList)),
                    cluster_cols = T, scale = "row", 
                    annotation_col = annotation_col)
@@ -710,10 +709,12 @@ pSite<-read_csv("./tables/normed_pSite_ratio_perseus.csv") %>%
     dplyr::select(-c("id"))
 
 pSite_tidy <- melt(pSite) %>%
-  separate(variable, c("genotype", "nutrient", "samplingTime", "replicate"), sep = "_") 
+  separate(variable, c("genotype", "nutrient", "samplingTime", "replicate"), sep = "_") %>%
+  dplyr::filter(genotype %in% c("rim15KO","WT"))
 
 #caculate the profile of each protein
 relative_pS <- pSite_tidy %>% unite(cond, genotype, nutrient, replicate) %>%
+  drop_na() %>%
   spread(key = samplingTime, value = value) %>%
   mutate(`T00/T00` = T00-T00, `T06/T00` = T06-T00, `T16/T00` = T16-T00, `T30/T00` = T30-T00) %>%
   melt() %>%
