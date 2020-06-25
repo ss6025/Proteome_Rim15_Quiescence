@@ -9,6 +9,10 @@ output: rmarkdown::github_document
 knitr::opts_chunk$set(echo = TRUE)
 ```
 
+```{r, echo = FALSE}
+knitr::opts_chunk$set(fig.path = "README_figs/README-")
+```
+
 #read in files
 #load packages
 ```{r}
