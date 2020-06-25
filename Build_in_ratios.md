@@ -1,131 +1,156 @@
-phospho proteomics analysis (based on normalized ratio)
-================
-Siyu Sun
-5/4/2020
+---
+title: "phospho proteomics analysis (based on normalized ratio)"
+author: "Siyu Sun"
+date: "5/4/2020"
+output: 
+  html_document:
+    keep_md: true
+---
 
-read in files
-=============
 
-load packages
-=============
 
-``` r
+#read in files
+#load packages
+
+```r
 library(ggplot2)
 library(reshape2)
 library(tidyverse)
 ```
 
-    ## ── Attaching packages ─────────────────────────────── tidyverse 1.3.0 ──
+```
+## ── Attaching packages ───────────────────────────────────────────────── tidyverse 1.3.0 ──
+```
 
-    ## ✓ tibble  3.0.1     ✓ dplyr   0.8.5
-    ## ✓ tidyr   1.0.2     ✓ stringr 1.4.0
-    ## ✓ readr   1.3.1     ✓ forcats 0.5.0
-    ## ✓ purrr   0.3.4
+```
+## ✓ tibble  3.0.1     ✓ dplyr   0.8.5
+## ✓ tidyr   1.0.2     ✓ stringr 1.4.0
+## ✓ readr   1.3.1     ✓ forcats 0.5.0
+## ✓ purrr   0.3.4
+```
 
-    ## ── Conflicts ────────────────────────────────── tidyverse_conflicts() ──
-    ## x dplyr::filter() masks stats::filter()
-    ## x dplyr::lag()    masks stats::lag()
+```
+## ── Conflicts ──────────────────────────────────────────────────── tidyverse_conflicts() ──
+## x dplyr::filter() masks stats::filter()
+## x dplyr::lag()    masks stats::lag()
+```
 
-``` r
+```r
 library(GGally)
 ```
 
-    ## 
-    ## Attaching package: 'GGally'
+```
+## 
+## Attaching package: 'GGally'
+```
 
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     nasa
+```
+## The following object is masked from 'package:dplyr':
+## 
+##     nasa
+```
 
-``` r
+```r
 library(ggpubr)
 ```
 
-    ## Loading required package: magrittr
+```
+## Loading required package: magrittr
+```
 
-    ## 
-    ## Attaching package: 'magrittr'
+```
+## 
+## Attaching package: 'magrittr'
+```
 
-    ## The following object is masked from 'package:purrr':
-    ## 
-    ##     set_names
+```
+## The following object is masked from 'package:purrr':
+## 
+##     set_names
+```
 
-    ## The following object is masked from 'package:tidyr':
-    ## 
-    ##     extract
+```
+## The following object is masked from 'package:tidyr':
+## 
+##     extract
+```
 
-``` r
+```r
 library(ggrepel)
 library(gridExtra)
 ```
 
-    ## 
-    ## Attaching package: 'gridExtra'
+```
+## 
+## Attaching package: 'gridExtra'
+```
 
-    ## The following object is masked from 'package:dplyr':
-    ## 
-    ##     combine
+```
+## The following object is masked from 'package:dplyr':
+## 
+##     combine
+```
 
-``` r
+```r
 library(devtools)
 ```
 
-    ## Loading required package: usethis
+```
+## Loading required package: usethis
+```
 
-``` r
+```r
 library(ggfortify)
 library(limma)
 library(broom)
 library(pheatmap)
 ```
 
-read in protein files
-=====================
+#read in protein files
 
-``` r
+```r
 #set working directory
 #read in protein groups 
 proteinGroups <- read_csv("./data/proteinGroups.csv")
 ```
 
-    ## Parsed with column specification:
-    ## cols(
-    ##   .default = col_double(),
-    ##   `Protein IDs` = col_character(),
-    ##   `Majority protein IDs` = col_character(),
-    ##   `Peptide counts (all)` = col_character(),
-    ##   `Peptide counts (razor+unique)` = col_character(),
-    ##   `Peptide counts (unique)` = col_character(),
-    ##   `Protein names` = col_character(),
-    ##   `Gene names` = col_character(),
-    ##   `Fasta headers` = col_character(),
-    ##   `Sequence lengths` = col_character(),
-    ##   `Identification type phospho_C_T00_R1` = col_character(),
-    ##   `Identification type phospho_C_T00_R2` = col_character(),
-    ##   `Identification type phospho_C_T00_R3` = col_character(),
-    ##   `Identification type phospho_C_T06_R1` = col_character(),
-    ##   `Identification type phospho_C_T06_R2` = col_character(),
-    ##   `Identification type phospho_C_T06_R3` = col_character(),
-    ##   `Identification type phospho_C_T16_R1` = col_character(),
-    ##   `Identification type phospho_C_T16_R2` = col_character(),
-    ##   `Identification type phospho_C_T16_R3` = col_character(),
-    ##   `Identification type phospho_C_T30_R1` = col_character(),
-    ##   `Identification type phospho_C_T30_R2` = col_character()
-    ##   # ... with 245 more columns
-    ## )
+```
+## Parsed with column specification:
+## cols(
+##   .default = col_double(),
+##   `Protein IDs` = col_character(),
+##   `Majority protein IDs` = col_character(),
+##   `Peptide counts (all)` = col_character(),
+##   `Peptide counts (razor+unique)` = col_character(),
+##   `Peptide counts (unique)` = col_character(),
+##   `Protein names` = col_character(),
+##   `Gene names` = col_character(),
+##   `Fasta headers` = col_character(),
+##   `Sequence lengths` = col_character(),
+##   `Identification type phospho_C_T00_R1` = col_character(),
+##   `Identification type phospho_C_T00_R2` = col_character(),
+##   `Identification type phospho_C_T00_R3` = col_character(),
+##   `Identification type phospho_C_T06_R1` = col_character(),
+##   `Identification type phospho_C_T06_R2` = col_character(),
+##   `Identification type phospho_C_T06_R3` = col_character(),
+##   `Identification type phospho_C_T16_R1` = col_character(),
+##   `Identification type phospho_C_T16_R2` = col_character(),
+##   `Identification type phospho_C_T16_R3` = col_character(),
+##   `Identification type phospho_C_T30_R1` = col_character(),
+##   `Identification type phospho_C_T30_R2` = col_character()
+##   # ... with 245 more columns
+## )
+```
 
-    ## See spec(...) for full column specifications.
+```
+## See spec(...) for full column specifications.
+```
 
-normalized ratios
-=================
+#normalized ratios 
+#add the corresponding attributes for time 0 in each condition
+##build in ratio from Maxquant, un-normalized
 
-add the corresponding attributes for time 0 in each condition
-=============================================================
-
-build in ratio from Maxquant, un-normalized
--------------------------------------------
-
-``` r
+```r
 #extract the protome info
 ratio_normed <- proteinGroups %>% 
   #select coloumns that contains the useful information - based on the experiments setups
@@ -162,9 +187,11 @@ ratio_normed_tidy <- melt(ratio_normed_add) %>%
   dplyr::filter(channel %in% c("H/L","M/L","H/M"))
 ```
 
-    ## Using Protein IDs, Gene names, Protein names, Fasta headers as id variables
+```
+## Using Protein IDs, Gene names, Protein names, Fasta headers as id variables
+```
 
-``` r
+```r
 #box plot
 ggplot(ratio_normed_tidy, aes(x=samplingTime, y=value, fill = channel)) + 
   geom_boxplot(position=position_dodge(0.8))+#, outlier.shape = NA) +
@@ -177,11 +204,13 @@ ggplot(ratio_normed_tidy, aes(x=samplingTime, y=value, fill = channel)) +
   ylab("Ratio")
 ```
 
-    ## Warning: Removed 127128 rows containing non-finite values (stat_boxplot).
+```
+## Warning: Removed 127128 rows containing non-finite values (stat_boxplot).
+```
 
-![](README_figs/README-unnamed-chunk-4-1.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-1.png)<!-- -->
 
-``` r
+```r
 #summary table
 summary_table <- ratio_normed_tidy %>% 
   group_by (channel, nutrient, samplingTime, replicate) %>%
@@ -206,11 +235,13 @@ non_NAs %>%
   ylab("unique proteins identified")
 ```
 
-    ## Warning: Ignoring unknown aesthetics: fill
+```
+## Warning: Ignoring unknown aesthetics: fill
+```
 
-![](README_figs/README-unnamed-chunk-4-2.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-2.png)<!-- -->
 
-``` r
+```r
 #look at the distribution of proteins 
 ratio_normed_tidy %>%
   #remove values that is 0
@@ -225,15 +256,21 @@ ratio_normed_tidy %>%
   ggtitle("Ratio distribution")
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
 
-    ## Warning: Removed 127128 rows containing non-finite values (stat_bin).
+```
+## Warning: Removed 127128 rows containing non-finite values (stat_bin).
+```
 
-    ## Warning: Removed 127128 rows containing non-finite values (stat_density).
+```
+## Warning: Removed 127128 rows containing non-finite values (stat_density).
+```
 
-![](README_figs/README-unnamed-chunk-4-3.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-3.png)<!-- -->
 
-``` r
+```r
 #coorelation Among Replicates 
 df_spread <- ratio_normed_tidy %>% 
   spread(key = replicate, value = value) 
@@ -249,13 +286,17 @@ ggscatter(df_spread, x = "R1", y = "R2", alpha = 0.3, merge = TRUE, size=0.8,  c
   ggtitle("Scatter plot for Rep1 vs Rep2 (build-in ratio)")
 ```
 
-    ## Warning: Removed 46273 rows containing non-finite values (stat_cor).
+```
+## Warning: Removed 46273 rows containing non-finite values (stat_cor).
+```
 
-    ## Warning: Removed 46273 rows containing missing values (geom_point).
+```
+## Warning: Removed 46273 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-4-4.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-4.png)<!-- -->
 
-``` r
+```r
   #coorelation between rep1 and rep3
 ggscatter(df_spread, x = "R1", y = "R3", alpha = .3, size=0.8, cor.coef.size = 0.4,  col= "channel", shape = "channel", palette = c("#50a3a4", "#fcaf38", "#f95335")) + # Add confidence interval)
     stat_cor(aes(color = channel), method = "pearson", label.x.npc = "left", label.y.npc = "top", size=2)  +
@@ -268,13 +309,17 @@ ggscatter(df_spread, x = "R1", y = "R3", alpha = .3, size=0.8, cor.coef.size = 0
     ggtitle("Scatter plot for Rep1 vs Rep3 (build-in ratio)")
 ```
 
-    ## Warning: Removed 46530 rows containing non-finite values (stat_cor).
+```
+## Warning: Removed 46530 rows containing non-finite values (stat_cor).
+```
 
-    ## Warning: Removed 46530 rows containing missing values (geom_point).
+```
+## Warning: Removed 46530 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-4-5.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-5.png)<!-- -->
 
-``` r
+```r
 ##reversed build-in ratio by genotypes
 ##swith H/L to M/L
 rep2_HL_ML <- ratio_normed_tidy %>% 
@@ -295,9 +340,11 @@ rep2 <- bind_rows(rep2_HL_ML, rep2_ML_HL,rep2_MH_MH)
 new_re <- anti_join(ratio_normed_tidy,ratio_normed_tidy %>% dplyr::filter (nutrient == "P" & replicate == "R2"))
 ```
 
-    ## Joining, by = c("Protein IDs", "Gene names", "Protein names", "Fasta headers", "channel", "nutrient", "samplingTime", "replicate", "value")
+```
+## Joining, by = c("Protein IDs", "Gene names", "Protein names", "Fasta headers", "channel", "nutrient", "samplingTime", "replicate", "value")
+```
 
-``` r
+```r
 ratio_normed_tidy_re <- bind_rows(rep2, new_re) %>%
   mutate(channel=replace(channel, channel=="M/L", "rim15KO")) %>%
   mutate(channel=replace(channel, channel=="H/L", "WT")) %>%
@@ -317,11 +364,13 @@ ggplot(ratio_normed_tidy_re, aes(x=genotype, y=log2(value), fill = samplingTime)
   ylab("Ratio")
 ```
 
-    ## Warning: Removed 127128 rows containing non-finite values (stat_boxplot).
+```
+## Warning: Removed 127128 rows containing non-finite values (stat_boxplot).
+```
 
-![](README_figs/README-unnamed-chunk-4-6.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-6.png)<!-- -->
 
-``` r
+```r
 #box plot for different genotypes at T00
 ggplot(ratio_normed_tidy_re %>% dplyr::filter(samplingTime == "T00"), aes(x=genotype, y=log2(value), fill = samplingTime)) + 
   geom_boxplot(position=position_dodge(0.8), outlier.shape = NA) +
@@ -333,11 +382,13 @@ ggplot(ratio_normed_tidy_re %>% dplyr::filter(samplingTime == "T00"), aes(x=geno
   ylab("log2(Ratio)")
 ```
 
-    ## Warning: Removed 21176 rows containing non-finite values (stat_boxplot).
+```
+## Warning: Removed 21176 rows containing non-finite values (stat_boxplot).
+```
 
-![](README_figs/README-unnamed-chunk-4-7.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-7.png)<!-- -->
 
-``` r
+```r
 #look at the distribution of proteins 
 ratio_normed_tidy_re %>%
   #remove values that is 0
@@ -352,15 +403,21 @@ ratio_normed_tidy_re %>%
   ggtitle("Scatter plot for Rep1 vs Rep3 (build-in ratio)")
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
 
-    ## Warning: Removed 127128 rows containing non-finite values (stat_bin).
+```
+## Warning: Removed 127128 rows containing non-finite values (stat_bin).
+```
 
-    ## Warning: Removed 127128 rows containing non-finite values (stat_density).
+```
+## Warning: Removed 127128 rows containing non-finite values (stat_density).
+```
 
-![](README_figs/README-unnamed-chunk-4-8.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-8.png)<!-- -->
 
-``` r
+```r
 #coorelation Among Replicates 
 df_spread <- ratio_normed_tidy_re %>% 
   spread(key = replicate, value = value) 
@@ -376,13 +433,17 @@ ggscatter(df_spread, x = "R1", y = "R2", alpha = 0.3, merge = TRUE, size=0.8,  c
   ggtitle("Scatter plot for Rep1 vs Rep2 (build-in ratio)")
 ```
 
-    ## Warning: Removed 46273 rows containing non-finite values (stat_cor).
+```
+## Warning: Removed 46273 rows containing non-finite values (stat_cor).
+```
 
-    ## Warning: Removed 46273 rows containing missing values (geom_point).
+```
+## Warning: Removed 46273 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-4-9.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-9.png)<!-- -->
 
-``` r
+```r
   #coorelation between rep1 and rep3
   ggscatter(df_spread, x = "R1", y = "R3", alpha = .3, size=0.8, cor.coef.size = 0.4,  col= "genotype", shape = "genotype", palette = c("#50a3a4", "#fcaf38", "#f95335")) + # Add confidence interval)
     stat_cor(aes(color = genotype), method = "pearson", label.x.npc = "left", label.y.npc = "top", size=2)  +
@@ -395,13 +456,17 @@ ggscatter(df_spread, x = "R1", y = "R2", alpha = 0.3, merge = TRUE, size=0.8,  c
     ggtitle("Scatter plot for Rep1 vs Rep3 (build-in ratio)")
 ```
 
-    ## Warning: Removed 46530 rows containing non-finite values (stat_cor).
+```
+## Warning: Removed 46530 rows containing non-finite values (stat_cor).
+```
 
-    ## Warning: Removed 46530 rows containing missing values (geom_point).
+```
+## Warning: Removed 46530 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-4-10.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-3-10.png)<!-- -->
 
-``` r
+```r
 ratio_normed_core <- ratio_normed_tidy_re  %>%
   #drop_na("value") %>%
   #filter(genotype %in% c("rim15KO","WT")) %>%
@@ -430,13 +495,15 @@ annotation_col <- names(df)[-1] %>% as.tibble() %>%
   column_to_rownames(var = "value")
 ```
 
-    ## Warning: `as.tibble()` is deprecated as of tibble 2.0.0.
-    ## Please use `as_tibble()` instead.
-    ## The signature and semantics have changed, see `?as_tibble`.
-    ## This warning is displayed once every 8 hours.
-    ## Call `lifecycle::last_warnings()` to see where this warning was generated.
+```
+## Warning: `as.tibble()` is deprecated as of tibble 2.0.0.
+## Please use `as_tibble()` instead.
+## The signature and semantics have changed, see `?as_tibble`.
+## This warning is displayed once every 8 hours.
+## Call `lifecycle::last_warnings()` to see where this warning was generated.
+```
 
-``` r
+```r
 library(RColorBrewer)
 breaksList = seq(-0.07, 0.07, by = 0.0001)
 
@@ -447,10 +514,12 @@ pheatmap(df[,-1] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10, name = "R
 dev.off()
 ```
 
-    ## pdf 
-    ##   3
+```
+## pdf 
+##   3
+```
 
-``` r
+```r
 pdf("./plots/ratio_normed_heat_light.pdf", width = 10, height = 8)
 pheatmap(df[,c(2:25,38:61)] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10, name = "RdYlBu")))(length(breaksList)),
                    cluster_cols = T, scale = "row", 
@@ -458,10 +527,12 @@ pheatmap(df[,c(2:25,38:61)] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10
 dev.off()
 ```
 
-    ## pdf 
-    ##   3
+```
+## pdf 
+##   3
+```
 
-``` r
+```r
 #look at C sample alone
 pheatmap(df[,c(2:25)] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10, name = "RdYlBu")))(length(breaksList)),
                    cluster_cols = T, scale = "row", 
@@ -482,9 +553,11 @@ pheatmap(df[,c(38:61)] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10, nam
   dim(dz)
 ```
 
-    ## [1]  48 869
+```
+## [1]  48 869
+```
 
-``` r
+```r
   l<-length(dz)-6
   
 pdf("./plots/ratio_normed_PCA_time.pdf",width=7,height=5)
@@ -498,10 +571,12 @@ autoplot(prcomp(dz[,c(1:l)]), data = dz, colour = 'genotype', size = 3) +
 dev.off()
 ```
 
-    ## pdf 
-    ##   3
+```
+## pdf 
+##   3
+```
 
-``` r
+```r
 #reshape the core dataset for perseus 
 perseus <- ratio_normed_tidy_re %>% 
   select(`Protein IDs`,`Protein names`,`Gene names`,`Fasta headers`, genotype,nutrient,samplingTime,replicate,value) %>%
@@ -514,20 +589,19 @@ perseus$`Gene names` <- ifelse(is.na(perseus$`Gene names`), perseus$`Protein nam
 write_csv(perseus,"./tables/normed_ratio_perseus.csv")
 ```
 
-Overall, we observed less differential expression between genotypes from PCA plot. Dan suggest a k-means (2-means) cluetering to visualize the data
-===================================================================================================================================================
+#Overall, we observed less differential expression between genotypes from PCA plot. Dan suggest a k-means (2-means) cluetering to visualize the data
+#kmeans clustering of protein groups
 
-kmeans clustering of protein groups
-===================================
-
-``` r
+```r
 library(cluster)    # clustering algorithms
 library(factoextra) # clustering algorithms & visualization
 ```
 
-    ## Welcome! Want to learn more? See two factoextra-related books at https://goo.gl/ve3WBa
+```
+## Welcome! Want to learn more? See two factoextra-related books at https://goo.gl/ve3WBa
+```
 
-``` r
+```r
 pGroups <- na.omit(perseus)
 #set the Gene names as Row names
 pGroups <- pGroups %>% 
@@ -537,13 +611,17 @@ pGroups <- pGroups %>%
   unite(names, `Gene names`,genotype)
 ```
 
-    ## Using Gene names as id variables
+```
+## Using Gene names as id variables
+```
 
-    ## Warning: Expected 4 pieces. Additional pieces discarded in 21144 rows [42289,
-    ## 42290, 42291, 42292, 42293, 42294, 42295, 42296, 42297, 42298, 42299, 42300,
-    ## 42301, 42302, 42303, 42304, 42305, 42306, 42307, 42308, ...].
+```
+## Warning: Expected 4 pieces. Additional pieces discarded in 21144 rows [42289,
+## 42290, 42291, 42292, 42293, 42294, 42295, 42296, 42297, 42298, 42299, 42300,
+## 42301, 42302, 42303, 42304, 42305, 42306, 42307, 42308, ...].
+```
 
-``` r
+```r
 #look at one condition @ one timepoint
 T00_C <- pGroups %>%
   dplyr::filter(nutrient == "P", time == "T30") %>%
@@ -556,15 +634,17 @@ df <- scale(T00_C)
 head(df)
 ```
 
-    ##                      R1          R2         R3
-    ## AAP1_rim15KO -0.7527054 -0.63473291 -0.8708873
-    ## AAP1_WT      -1.0383460 -0.61819641 -0.4700921
-    ## AAT2_rim15KO -0.1891465  0.05263614 -0.4545168
-    ## AAT2_WT      -0.7890418 -0.72732578 -0.8419074
-    ## ABF2_rim15KO  0.2446574 -0.05639719  0.4123512
-    ## ABF2_WT       1.0037359  0.61927532  0.5663138
+```
+##                      R1          R2         R3
+## AAP1_rim15KO -0.7527054 -0.63473291 -0.8708873
+## AAP1_WT      -1.0383460 -0.61819641 -0.4700921
+## AAT2_rim15KO -0.1891465  0.05263614 -0.4545168
+## AAT2_WT      -0.7890418 -0.72732578 -0.8419074
+## ABF2_rim15KO  0.2446574 -0.05639719  0.4123512
+## ABF2_WT       1.0037359  0.61927532  0.5663138
+```
 
-``` r
+```r
 #distance <- get_dist(df)
 #fviz_dist(distance, gradient = list(low = "#00AFBB", mid = "white", high = "#FC4E07"))
 
@@ -572,82 +652,88 @@ k2 <- kmeans(df, centers =3)
 str(k2)
 ```
 
-    ## List of 9
-    ##  $ cluster     : Named int [1:1762] 3 3 3 3 2 2 2 2 3 3 ...
-    ##   ..- attr(*, "names")= chr [1:1762] "AAP1_rim15KO" "AAP1_WT" "AAT2_rim15KO" "AAT2_WT" ...
-    ##  $ centers     : num [1:3, 1:3] 2.535 0.349 -0.678 2.629 0.291 ...
-    ##   ..- attr(*, "dimnames")=List of 2
-    ##   .. ..$ : chr [1:3] "1" "2" "3"
-    ##   .. ..$ : chr [1:3] "R1" "R2" "R3"
-    ##  $ totss       : num 5283
-    ##  $ withinss    : num [1:3] 633 473 456
-    ##  $ tot.withinss: num 1562
-    ##  $ betweenss   : num 3721
-    ##  $ size        : int [1:3] 118 794 850
-    ##  $ iter        : int 2
-    ##  $ ifault      : int 0
-    ##  - attr(*, "class")= chr "kmeans"
+```
+## List of 9
+##  $ cluster     : Named int [1:1762] 2 2 2 2 1 1 1 1 2 2 ...
+##   ..- attr(*, "names")= chr [1:1762] "AAP1_rim15KO" "AAP1_WT" "AAT2_rim15KO" "AAT2_WT" ...
+##  $ centers     : num [1:3, 1:3] 0.349 -0.678 2.535 0.291 -0.637 ...
+##   ..- attr(*, "dimnames")=List of 2
+##   .. ..$ : chr [1:3] "1" "2" "3"
+##   .. ..$ : chr [1:3] "R1" "R2" "R3"
+##  $ totss       : num 5283
+##  $ withinss    : num [1:3] 473 456 633
+##  $ tot.withinss: num 1562
+##  $ betweenss   : num 3721
+##  $ size        : int [1:3] 794 850 118
+##  $ iter        : int 2
+##  $ ifault      : int 0
+##  - attr(*, "class")= chr "kmeans"
+```
 
-``` r
+```r
 fviz_cluster(k2, data = df)
 ```
 
-![](README_figs/README-unnamed-chunk-5-1.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-4-1.png)<!-- -->
 
-read in pSite table
-===================
+#read in pSite table
 
-``` r
+```r
 #read in pSite groups 
 phosphosites <- read_csv("./data/Phospho (STY)Sites.csv")
 ```
 
-    ## Parsed with column specification:
-    ## cols(
-    ##   .default = col_double(),
-    ##   Proteins = col_character(),
-    ##   `Positions within proteins` = col_character(),
-    ##   `Leading proteins` = col_character(),
-    ##   Protein = col_character(),
-    ##   `Protein names` = col_character(),
-    ##   `Gene names` = col_character(),
-    ##   `Fasta headers` = col_character(),
-    ##   `Localization prob proteome_C_T00_R1` = col_logical(),
-    ##   `Score diff proteome_C_T00_R1` = col_logical(),
-    ##   `PEP proteome_C_T00_R1` = col_logical(),
-    ##   `Score proteome_C_T00_R1` = col_logical(),
-    ##   `Localization prob proteome_C_T00_R2` = col_logical(),
-    ##   `Score diff proteome_C_T00_R2` = col_logical(),
-    ##   `PEP proteome_C_T00_R2` = col_logical(),
-    ##   `Score proteome_C_T00_R2` = col_logical(),
-    ##   `Localization prob proteome_C_T00_R3` = col_logical(),
-    ##   `Score diff proteome_C_T00_R3` = col_logical(),
-    ##   `PEP proteome_C_T00_R3` = col_logical(),
-    ##   `Score proteome_C_T00_R3` = col_logical(),
-    ##   `Localization prob proteome_C_T06_R1` = col_logical()
-    ##   # ... with 1900 more columns
-    ## )
+```
+## Parsed with column specification:
+## cols(
+##   .default = col_double(),
+##   Proteins = col_character(),
+##   `Positions within proteins` = col_character(),
+##   `Leading proteins` = col_character(),
+##   Protein = col_character(),
+##   `Protein names` = col_character(),
+##   `Gene names` = col_character(),
+##   `Fasta headers` = col_character(),
+##   `Localization prob proteome_C_T00_R1` = col_logical(),
+##   `Score diff proteome_C_T00_R1` = col_logical(),
+##   `PEP proteome_C_T00_R1` = col_logical(),
+##   `Score proteome_C_T00_R1` = col_logical(),
+##   `Localization prob proteome_C_T00_R2` = col_logical(),
+##   `Score diff proteome_C_T00_R2` = col_logical(),
+##   `PEP proteome_C_T00_R2` = col_logical(),
+##   `Score proteome_C_T00_R2` = col_logical(),
+##   `Localization prob proteome_C_T00_R3` = col_logical(),
+##   `Score diff proteome_C_T00_R3` = col_logical(),
+##   `PEP proteome_C_T00_R3` = col_logical(),
+##   `Score proteome_C_T00_R3` = col_logical(),
+##   `Localization prob proteome_C_T06_R1` = col_logical()
+##   # ... with 1900 more columns
+## )
+```
 
-    ## See spec(...) for full column specifications.
+```
+## See spec(...) for full column specifications.
+```
 
-    ## Warning: 332 parsing failures.
-    ##  row               col               expected               actual                            file
-    ## 1535 Protein group IDs no trailing characters ;3394                './data/Phospho (STY)Sites.csv'
-    ## 1535 Positions         no trailing characters ;18                  './data/Phospho (STY)Sites.csv'
-    ## 1536 Protein group IDs no trailing characters ;3394                './data/Phospho (STY)Sites.csv'
-    ## 1536 Positions         no trailing characters ;19                  './data/Phospho (STY)Sites.csv'
-    ## 1696 Protein group IDs no trailing characters ;3223;3308;3447;3455 './data/Phospho (STY)Sites.csv'
-    ## .... ................. ...................... .................... ...............................
-    ## See problems(...) for more details.
+```
+## Warning: 332 parsing failures.
+##  row               col               expected               actual                            file
+## 1535 Protein group IDs no trailing characters ;3394                './data/Phospho (STY)Sites.csv'
+## 1535 Positions         no trailing characters ;18                  './data/Phospho (STY)Sites.csv'
+## 1536 Protein group IDs no trailing characters ;3394                './data/Phospho (STY)Sites.csv'
+## 1536 Positions         no trailing characters ;19                  './data/Phospho (STY)Sites.csv'
+## 1696 Protein group IDs no trailing characters ;3223;3308;3447;3455 './data/Phospho (STY)Sites.csv'
+## .... ................. ...................... .................... ...............................
+## See problems(...) for more details.
+```
 
-``` r
+```r
 #View(phosphosites)
 ```
 
-look at the pSite normalized ratios
-===================================
+#look at the pSite normalized ratios
 
-``` r
+```r
 #extract the protome info
 ratio_normed <- phosphosites %>%
   dplyr::select(Proteins, id, `Positions within proteins`,`Leading proteins`,`Protein names`,`Gene names`,`Fasta headers`, `Localization prob`,`Sequence window`, contains("Ratio")) %>%
@@ -689,9 +775,11 @@ ratio_normed_tidy <- melt(ratio_normed_add) %>%
   dplyr::filter(channel %in% c("H/L","M/L","H/M"))
 ```
 
-    ## Using Proteins, id, pSite, Leading proteins, Protein names, Gene names, Fasta headers, Sequence window as id variables
+```
+## Using Proteins, id, pSite, Leading proteins, Protein names, Gene names, Fasta headers, Sequence window as id variables
+```
 
-``` r
+```r
 #box plot
 ggplot(ratio_normed_tidy, aes(x=samplingTime, y=value, fill = channel)) + 
   geom_boxplot(position=position_dodge(0.8))+#, outlier.shape = NA) +
@@ -703,11 +791,13 @@ ggplot(ratio_normed_tidy, aes(x=samplingTime, y=value, fill = channel)) +
   ylab("Ratio")
 ```
 
-    ## Warning: Removed 207539 rows containing non-finite values (stat_boxplot).
+```
+## Warning: Removed 207539 rows containing non-finite values (stat_boxplot).
+```
 
-![](README_figs/README-unnamed-chunk-7-1.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-1.png)<!-- -->
 
-``` r
+```r
 #summary table
 summary_table <- ratio_normed_tidy %>% 
   group_by (channel, nutrient, samplingTime, replicate) %>%
@@ -732,11 +822,13 @@ non_NAs %>%
   ylab("unique pSite identified")
 ```
 
-    ## Warning: Ignoring unknown aesthetics: fill
+```
+## Warning: Ignoring unknown aesthetics: fill
+```
 
-![](README_figs/README-unnamed-chunk-7-2.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-2.png)<!-- -->
 
-``` r
+```r
 #look at the distribution of proteins 
 ratio_normed_tidy %>%
   #remove values that is 0
@@ -751,15 +843,21 @@ ratio_normed_tidy %>%
   ggtitle("Ratio distribution")
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
 
-    ## Warning: Removed 207539 rows containing non-finite values (stat_bin).
+```
+## Warning: Removed 207539 rows containing non-finite values (stat_bin).
+```
 
-    ## Warning: Removed 207539 rows containing non-finite values (stat_density).
+```
+## Warning: Removed 207539 rows containing non-finite values (stat_density).
+```
 
-![](README_figs/README-unnamed-chunk-7-3.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-3.png)<!-- -->
 
-``` r
+```r
 #coorelation Among Replicates 
 df_spread <- ratio_normed_tidy %>% 
   spread(key = replicate, value = value) 
@@ -775,13 +873,17 @@ ggscatter(df_spread, x = "R1", y = "R2", alpha = 0.3, merge = TRUE, size=0.8,  c
   ggtitle("Scatter plot for Rep1 vs Rep2 (build-in pSite ratio)")
 ```
 
-    ## Warning: Removed 83822 rows containing non-finite values (stat_cor).
+```
+## Warning: Removed 83822 rows containing non-finite values (stat_cor).
+```
 
-    ## Warning: Removed 83822 rows containing missing values (geom_point).
+```
+## Warning: Removed 83822 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-7-4.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-4.png)<!-- -->
 
-``` r
+```r
   #coorelation between rep1 and rep3
 ggscatter(df_spread, x = "R1", y = "R3", alpha = .3, size=0.8, cor.coef.size = 0.4,  col= "channel", shape = "channel", palette = c("#50a3a4", "#fcaf38", "#f95335")) + # Add confidence interval)
     stat_cor(aes(color = channel), method = "pearson", label.x.npc = "left", label.y.npc = "top", size=2)  +
@@ -794,13 +896,17 @@ ggscatter(df_spread, x = "R1", y = "R3", alpha = .3, size=0.8, cor.coef.size = 0
     ggtitle("Scatter plot for Rep1 vs Rep3 (build-in pSite ratio)")
 ```
 
-    ## Warning: Removed 84826 rows containing non-finite values (stat_cor).
+```
+## Warning: Removed 84826 rows containing non-finite values (stat_cor).
+```
 
-    ## Warning: Removed 84826 rows containing missing values (geom_point).
+```
+## Warning: Removed 84826 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-7-5.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-5.png)<!-- -->
 
-``` r
+```r
 ##reversed build-in ratio by genotypes
 rep2_HL_ML <- ratio_normed_tidy %>% 
   dplyr::filter(channel == "H/L" & replicate == "R2" & nutrient == "P") %>%
@@ -820,9 +926,11 @@ rep2 <- bind_rows(rep2_HL_ML, rep2_ML_HL,rep2_MH_MH)
 new_re <- anti_join(ratio_normed_tidy, ratio_normed_tidy %>% dplyr::filter (nutrient == "P" & replicate == "R2"))
 ```
 
-    ## Joining, by = c("Proteins", "id", "pSite", "Leading proteins", "Protein names", "Gene names", "Fasta headers", "Sequence window", "channel", "nutrient", "samplingTime", "replicate", "value")
+```
+## Joining, by = c("Proteins", "id", "pSite", "Leading proteins", "Protein names", "Gene names", "Fasta headers", "Sequence window", "channel", "nutrient", "samplingTime", "replicate", "value")
+```
 
-``` r
+```r
 ratio_normed_tidy_re <- bind_rows(rep2, new_re) %>%
   mutate(channel=replace(channel, channel=="M/L", "rim15KO")) %>%
   mutate(channel=replace(channel, channel=="H/L", "WT")) %>%
@@ -842,11 +950,13 @@ ggplot(ratio_normed_tidy_re, aes(x=genotype, y=log2(value), fill = samplingTime)
   ylab("pSites Ratio")
 ```
 
-    ## Warning: Removed 207539 rows containing non-finite values (stat_boxplot).
+```
+## Warning: Removed 207539 rows containing non-finite values (stat_boxplot).
+```
 
-![](README_figs/README-unnamed-chunk-7-6.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-6.png)<!-- -->
 
-``` r
+```r
 #box plot for different genotypes at T00
 ggplot(ratio_normed_tidy_re %>% dplyr::filter(samplingTime == "T00"), aes(x=genotype, y=log2(value), fill = samplingTime)) + 
   geom_boxplot(position=position_dodge(0.8), outlier.shape = NA) +
@@ -858,11 +968,13 @@ ggplot(ratio_normed_tidy_re %>% dplyr::filter(samplingTime == "T00"), aes(x=geno
   ylab("log2(pSites Ratio)")
 ```
 
-    ## Warning: Removed 51870 rows containing non-finite values (stat_boxplot).
+```
+## Warning: Removed 51870 rows containing non-finite values (stat_boxplot).
+```
 
-![](README_figs/README-unnamed-chunk-7-7.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-7.png)<!-- -->
 
-``` r
+```r
 #look at the distribution of proteins 
 ratio_normed_tidy_re %>%
   #remove values that is 0
@@ -877,15 +989,21 @@ ratio_normed_tidy_re %>%
   ggtitle("Scatter plot for Rep1 vs Rep3 (build-in pSites ratio)")
 ```
 
-    ## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
+## `stat_bin()` using `bins = 30`. Pick better value with `binwidth`.
+```
 
-    ## Warning: Removed 207539 rows containing non-finite values (stat_bin).
+```
+## Warning: Removed 207539 rows containing non-finite values (stat_bin).
+```
 
-    ## Warning: Removed 207539 rows containing non-finite values (stat_density).
+```
+## Warning: Removed 207539 rows containing non-finite values (stat_density).
+```
 
-![](README_figs/README-unnamed-chunk-7-8.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-8.png)<!-- -->
 
-``` r
+```r
 #coorelation Among Replicates 
 df_spread <- ratio_normed_tidy_re %>% 
   spread(key = replicate, value = value) 
@@ -901,13 +1019,17 @@ ggscatter(df_spread, x = "R1", y = "R2", alpha = 0.3, merge = TRUE, size=0.8,  c
   ggtitle("Scatter plot for Rep1 vs Rep2 (build-in pSites ratio)")
 ```
 
-    ## Warning: Removed 83821 rows containing non-finite values (stat_cor).
+```
+## Warning: Removed 83821 rows containing non-finite values (stat_cor).
+```
 
-    ## Warning: Removed 83821 rows containing missing values (geom_point).
+```
+## Warning: Removed 83821 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-7-9.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-9.png)<!-- -->
 
-``` r
+```r
   #coorelation between rep1 and rep3
   ggscatter(df_spread, x = "R1", y = "R3", alpha = .3, size=0.8, cor.coef.size = 0.4,  col= "genotype", shape = "genotype", palette = c("#50a3a4", "#fcaf38", "#f95335")) + # Add confidence interval)
     stat_cor(aes(color = genotype), method = "pearson", label.x.npc = "left", label.y.npc = "top", size=2)  +
@@ -920,13 +1042,17 @@ ggscatter(df_spread, x = "R1", y = "R2", alpha = 0.3, merge = TRUE, size=0.8,  c
     ggtitle("Scatter plot for Rep1 vs Rep3 (build-in pSites ratio)")
 ```
 
-    ## Warning: Removed 84826 rows containing non-finite values (stat_cor).
+```
+## Warning: Removed 84826 rows containing non-finite values (stat_cor).
+```
 
-    ## Warning: Removed 84826 rows containing missing values (geom_point).
+```
+## Warning: Removed 84826 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-7-10.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-6-10.png)<!-- -->
 
-``` r
+```r
 ratio_normed_core <- ratio_normed_tidy_re  %>%
   #filter(genotype %in% c("rim15KO", "WT")) %>%
   #drop_na("value") %>%
@@ -961,10 +1087,12 @@ pheatmap(df[,-1] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10, name = "R
 dev.off()
 ```
 
-    ## pdf 
-    ##   3
+```
+## pdf 
+##   3
+```
 
-``` r
+```r
 pdf("./plots/pSite_ratio_normed_heat_light.pdf", width = 10, height = 8)
 pheatmap(df[,c(2:25,38:61)] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10, name = "RdYlBu")))(length(breaksList)),
                    cluster_cols = T, scale = "row", 
@@ -972,10 +1100,12 @@ pheatmap(df[,c(2:25,38:61)] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10
 dev.off()
 ```
 
-    ## pdf 
-    ##   3
+```
+## pdf 
+##   3
+```
 
-``` r
+```r
 #look at C sample alone
 pheatmap(df[,c(2:25)] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10, name = "RdYlBu")))(length(breaksList)),
                    cluster_cols = T, scale = "row", 
@@ -996,9 +1126,11 @@ pheatmap(df[,c(38:61)] %>% drop_na(), colorRampPalette(rev(brewer.pal(n =10, nam
   dim(dz)
 ```
 
-    ## [1]  48 486
+```
+## [1]  48 486
+```
 
-``` r
+```r
   l<-length(dz)-6
   
 pdf("./plots/pSite_ratio_normed_PCA_time.pdf",width=7,height=5)
@@ -1012,10 +1144,12 @@ autoplot(prcomp(dz[,c(1:l)]), data = dz, colour = 'genotype', size = 3) +
 dev.off()
 ```
 
-    ## pdf 
-    ##   3
+```
+## pdf 
+##   3
+```
 
-``` r
+```r
 #reshape the core dataset for perseus 
 perseus <- ratio_normed_tidy_re %>% 
   select(Proteins, id, pSite, `Leading proteins`,`Protein names`,`Gene names`,`Fasta headers`, genotype,nutrient,samplingTime,replicate,value) %>%
@@ -1026,36 +1160,39 @@ perseus$`Gene names` <- ifelse(is.na(perseus$`Gene names`), perseus$`Protein nam
 write_csv(perseus,"./tables/normed_pSite_ratio_perseus.csv")
 ```
 
-normalize every data point in relative to time 0
-================================================
+#normalize every data point in relative to time 0
+## look at the logFC for both protein and pSites
 
-look at the logFC for both protein and pSites
----------------------------------------------
-
-``` r
+```r
 #read in pre-processed datafile
 proteinG<-read_csv("./tables/normed_ratio_perseus.csv")
 ```
 
-    ## Parsed with column specification:
-    ## cols(
-    ##   .default = col_double(),
-    ##   `Protein IDs` = col_character(),
-    ##   `Protein names` = col_character(),
-    ##   `Gene names` = col_character(),
-    ##   `Fasta headers` = col_character()
-    ## )
+```
+## Parsed with column specification:
+## cols(
+##   .default = col_double(),
+##   `Protein IDs` = col_character(),
+##   `Protein names` = col_character(),
+##   `Gene names` = col_character(),
+##   `Fasta headers` = col_character()
+## )
+```
 
-    ## See spec(...) for full column specifications.
+```
+## See spec(...) for full column specifications.
+```
 
-``` r
+```r
 proteinG_tidy <- melt(proteinG) %>%
   separate(variable, c("genotype", "nutrient", "samplingTime", "replicate"), sep = "_")
 ```
 
-    ## Using Protein IDs, Protein names, Gene names, Fasta headers as id variables
+```
+## Using Protein IDs, Protein names, Gene names, Fasta headers as id variables
+```
 
-``` r
+```r
 #caculate the profile of each protein
 relative_pG <- proteinG_tidy %>% unite(cond, genotype, nutrient, replicate) %>%
   spread(key = samplingTime, value = value) %>%
@@ -1064,9 +1201,11 @@ relative_pG <- proteinG_tidy %>% unite(cond, genotype, nutrient, replicate) %>%
   separate(cond, c("genotype","nutrient","replicate"), sep = "_") 
 ```
 
-    ## Using Protein IDs, Protein names, Gene names, Fasta headers, cond as id variables
+```
+## Using Protein IDs, Protein names, Gene names, Fasta headers, cond as id variables
+```
 
-``` r
+```r
 relative_pG%>%
   #dplyr::filter(nutrient == "P") %>%
   dplyr::filter(variable %in% c("T00/T00","T06/T00","T16/T00","T30/T00")) %>%
@@ -1083,11 +1222,13 @@ relative_pG%>%
   xlab("Hours post inoculation")
 ```
 
-    ## Warning: Removed 29867 row(s) containing missing values (geom_path).
+```
+## Warning: Removed 29867 row(s) containing missing values (geom_path).
+```
 
-![](README_figs/README-unnamed-chunk-8-1.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-7-1.png)<!-- -->
 
-``` r
+```r
 #drop na function
 delete.na <- function(DF, n=0) {DF[rowSums(is.na(DF)) <= n,]}
 
@@ -1109,26 +1250,32 @@ ttest_pG <- pG_filtered %>%
   summarise_each(funs(t.test(.[genotype == "WT"], .[genotype == "rim15KO"], var.equal=TRUE)$p.value), pvalue = value) 
 ```
 
-    ## Using Protein IDs, Protein names, Gene names, Fasta headers, nutrient, time as id variables
+```
+## Using Protein IDs, Protein names, Gene names, Fasta headers, nutrient, time as id variables
+```
 
-    ## Warning: Expected 2 pieces. Additional pieces discarded in 34542 rows [69085,
-    ## 69086, 69087, 69088, 69089, 69090, 69091, 69092, 69093, 69094, 69095, 69096,
-    ## 69097, 69098, 69099, 69100, 69101, 69102, 69103, 69104, ...].
+```
+## Warning: Expected 2 pieces. Additional pieces discarded in 34542 rows [69085,
+## 69086, 69087, 69088, 69089, 69090, 69091, 69092, 69093, 69094, 69095, 69096,
+## 69097, 69098, 69099, 69100, 69101, 69102, 69103, 69104, ...].
+```
 
-    ## Warning: funs() is soft deprecated as of dplyr 0.8.0
-    ## Please use a list of either functions or lambdas: 
-    ## 
-    ##   # Simple named list: 
-    ##   list(mean = mean, median = median)
-    ## 
-    ##   # Auto named with `tibble::lst()`: 
-    ##   tibble::lst(mean, median)
-    ## 
-    ##   # Using lambdas
-    ##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
-    ## This warning is displayed once per session.
+```
+## Warning: funs() is soft deprecated as of dplyr 0.8.0
+## Please use a list of either functions or lambdas: 
+## 
+##   # Simple named list: 
+##   list(mean = mean, median = median)
+## 
+##   # Auto named with `tibble::lst()`: 
+##   tibble::lst(mean, median)
+## 
+##   # Using lambdas
+##   list(~ mean(., trim = .2), ~ median(., na.rm = TRUE))
+## This warning is displayed once per session.
+```
 
-``` r
+```r
 ttest_pG$qvalue <- p.adjust(ttest_pG$pvalue,method="BH") 
 
 log2FC_pG <- pG_filtered %>%
@@ -1138,13 +1285,17 @@ log2FC_pG <- pG_filtered %>%
   summarise_each(funs(mean(.[genotype=="WT"], na.rm=TRUE)-mean(.[genotype == "rim15KO"], na.rm=TRUE)), log2FC = value)
 ```
 
-    ## Using Protein IDs, Protein names, Gene names, Fasta headers, nutrient, time as id variables
+```
+## Using Protein IDs, Protein names, Gene names, Fasta headers, nutrient, time as id variables
+```
 
-    ## Warning: Expected 2 pieces. Additional pieces discarded in 34542 rows [69085,
-    ## 69086, 69087, 69088, 69089, 69090, 69091, 69092, 69093, 69094, 69095, 69096,
-    ## 69097, 69098, 69099, 69100, 69101, 69102, 69103, 69104, ...].
+```
+## Warning: Expected 2 pieces. Additional pieces discarded in 34542 rows [69085,
+## 69086, 69087, 69088, 69089, 69090, 69091, 69092, 69093, 69094, 69095, 69096,
+## 69097, 69098, 69099, 69100, 69101, 69102, 69103, 69104, ...].
+```
 
-``` r
+```r
 logFC_ttest_pG <-left_join(ttest_pG, log2FC_pG, by = c( "Protein IDs","Protein names","Gene names","Fasta headers", "nutrient","time"))
 
 ggplot(data=logFC_ttest_pG %>% dplyr::filter(nutrient == "P"), aes(x=log2FC, y =-log10(qvalue))) +
@@ -1163,203 +1314,317 @@ c("#e7b800")) +
   theme(legend.position="none")
 ```
 
-    ## Warning: Removed 21 rows containing missing values (geom_point).
+```
+## Warning: Removed 21 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 1 rows containing missing values (geom_point).
+```
+## Warning: Removed 1 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-8-2.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-7-2.png)<!-- -->
 
-``` r
+```r
 ggsave("./plots/pGroups_volcano.pdf",width = 7, height = 4,  useDingbats=FALSE)
 ```
 
-    ## Warning: Removed 21 rows containing missing values (geom_point).
+```
+## Warning: Removed 21 rows containing missing values (geom_point).
 
-    ## Warning: Removed 1 rows containing missing values (geom_point).
+## Warning: Removed 1 rows containing missing values (geom_point).
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## font metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## font metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## font metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## font metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-``` r
+```r
 ###############################################################################################
 pSite<-read_csv("./tables/normed_pSite_ratio_perseus.csv") %>%
     dplyr::select(-c("id"))
 ```
 
-    ## Parsed with column specification:
-    ## cols(
-    ##   .default = col_double(),
-    ##   Proteins = col_character(),
-    ##   pSite = col_character(),
-    ##   `Leading proteins` = col_character(),
-    ##   `Protein names` = col_character(),
-    ##   `Gene names` = col_character(),
-    ##   `Fasta headers` = col_character()
-    ## )
-    ## See spec(...) for full column specifications.
+```
+## Parsed with column specification:
+## cols(
+##   .default = col_double(),
+##   Proteins = col_character(),
+##   pSite = col_character(),
+##   `Leading proteins` = col_character(),
+##   `Protein names` = col_character(),
+##   `Gene names` = col_character(),
+##   `Fasta headers` = col_character()
+## )
+## See spec(...) for full column specifications.
+```
 
-``` r
+```r
 pSite_tidy <- melt(pSite) %>%
   separate(variable, c("genotype", "nutrient", "samplingTime", "replicate"), sep = "_") %>%
   dplyr::filter(genotype %in% c("rim15KO","WT"))
 ```
 
-    ## Using Proteins, pSite, Leading proteins, Protein names, Gene names, Fasta headers as id variables
+```
+## Using Proteins, pSite, Leading proteins, Protein names, Gene names, Fasta headers as id variables
+```
 
-``` r
+```r
 #caculate the profile of each protein
 relative_pS <- pSite_tidy %>% unite(cond, genotype, nutrient, replicate) %>%
   drop_na() %>%
@@ -1369,9 +1634,11 @@ relative_pS <- pSite_tidy %>% unite(cond, genotype, nutrient, replicate) %>%
   separate(cond, c("genotype","nutrient","replicate"), sep = "_") 
 ```
 
-    ## Using Proteins, pSite, Leading proteins, Protein names, Gene names, Fasta headers, cond as id variables
+```
+## Using Proteins, pSite, Leading proteins, Protein names, Gene names, Fasta headers, cond as id variables
+```
 
-``` r
+```r
 relative_pS %>%
   dplyr::filter(variable %in% c("T00/T00","T06/T00","T16/T00","T30/T00")) %>%
   dplyr::filter(replicate == "R3") %>%
@@ -1387,13 +1654,17 @@ relative_pS %>%
   xlab("Hours post inoculation")
 ```
 
-    ## Warning: Ignoring unknown parameters: colours
+```
+## Warning: Ignoring unknown parameters: colours
+```
 
-    ## Warning: Removed 18928 row(s) containing missing values (geom_path).
+```
+## Warning: Removed 18928 row(s) containing missing values (geom_path).
+```
 
-![](README_figs/README-unnamed-chunk-8-3.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-7-3.png)<!-- -->
 
-``` r
+```r
 ###################################################
 #t-test between samples 
 pS_reshape <- relative_pS %>% 
@@ -1413,9 +1684,11 @@ ttest_pS <- pS_filtered %>%
   summarise_each(funs(t.test(.[genotype == "WT"], .[genotype == "rim15KO"], var.equal=TRUE)$p.value), pvalue = value) 
 ```
 
-    ## Using Proteins, pSite, Leading proteins, Protein names, Gene names, Fasta headers, nutrient, time as id variables
+```
+## Using Proteins, pSite, Leading proteins, Protein names, Gene names, Fasta headers, nutrient, time as id variables
+```
 
-``` r
+```r
 ttest_pS$qvalue <- p.adjust(ttest_pS$pvalue,method="BH") 
 
 log2FC_pS <- pS_filtered %>%
@@ -1425,9 +1698,11 @@ log2FC_pS <- pS_filtered %>%
   summarise_each(funs(mean(.[genotype=="WT"], na.rm=TRUE)-mean(.[genotype == "rim15KO"], na.rm=TRUE)), log2FC = value)
 ```
 
-    ## Using Proteins, pSite, Leading proteins, Protein names, Gene names, Fasta headers, nutrient, time as id variables
+```
+## Using Proteins, pSite, Leading proteins, Protein names, Gene names, Fasta headers, nutrient, time as id variables
+```
 
-``` r
+```r
 logFC_ttest_pS <-left_join(ttest_pS, log2FC_pS, by = c( "Proteins", "Leading proteins", "Protein names", "Gene names","pSite","Fasta headers", "nutrient","time")) %>%
     mutate(qvalue = round(qvalue, digits = 4))
 
@@ -1471,181 +1746,297 @@ xlab(expression(Log[2]*" (WT / rim15Δ)")) +
   theme(legend.position="none")
 ```
 
-    ## Warning: Removed 80 rows containing missing values (geom_point).
+```
+## Warning: Removed 80 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 2 rows containing missing values (geom_point).
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 6 rows containing missing values (geom_point).
+```
+## Warning: Removed 6 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-8-4.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-7-4.png)<!-- -->
 
-``` r
+```r
 ggsave("./plots/pSite_volcano.pdf",width = 7, height = 4, useDingbats=FALSE)
 ```
 
-    ## Warning: Removed 80 rows containing missing values (geom_point).
+```
+## Warning: Removed 80 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 2 rows containing missing values (geom_point).
+```
+## Warning: Removed 2 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 6 rows containing missing values (geom_point).
+```
+## Warning: Removed 6 rows containing missing values (geom_point).
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## font metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## font metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## font metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## font metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-``` r
+```r
 ggplot(data=logFC_ttest_pS %>% dplyr::filter(nutrient == "P", time == "T16"), aes(x=log2FC, y =-log10(qvalue))) +
   geom_point(data=dplyr::filter(logFC_ttest_pS, qvalue > 0.05,nutrient == "P", time == "T16"), alpha = 1/6, size = 2) +
   geom_point(data=dplyr::filter(logFC_ttest_pS, log2FC < 0, qvalue <= 0.051,nutrient == "P", time == "T16"), alpha =1, size =2.5,  color = c("#00afbb")) +
@@ -1663,188 +2054,307 @@ xlab(expression(Log[2]*" (WT / rim15Δ)")) +
   theme(legend.position="none")
 ```
 
-    ## Warning: Removed 14 rows containing missing values (geom_point).
+```
+## Warning: Removed 14 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 1 rows containing missing values (geom_point).
+```
+## Warning: Removed 1 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 4 rows containing missing values (geom_point).
+```
+## Warning: Removed 4 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 1 rows containing missing values (geom_text_repel).
+```
+## Warning: Removed 1 rows containing missing values (geom_text_repel).
+```
 
-![](README_figs/README-unnamed-chunk-8-5.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-7-5.png)<!-- -->
 
-``` r
+```r
 ggsave("./plots/pSite_volcano_P_T16.pdf", width = 7, height = 4, useDingbats=FALSE)
 ```
 
-    ## Warning: Removed 14 rows containing missing values (geom_point).
+```
+## Warning: Removed 14 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 1 rows containing missing values (geom_point).
+```
+## Warning: Removed 1 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 4 rows containing missing values (geom_point).
+```
+## Warning: Removed 4 rows containing missing values (geom_point).
+```
 
-    ## Warning: Removed 1 rows containing missing values (geom_text_repel).
+```
+## Warning: Removed 1 rows containing missing values (geom_text_repel).
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
-    ## metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, : font
+## metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call(C_textBounds, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## font metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## font metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## font metrics unknown for Unicode character U+0394
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## font metrics unknown for Unicode character U+0394
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <ce>
+```
 
-    ## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
-    ## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
+## Warning in grid.Call.graphics(C_text, as.graphicsAnnot(x$label), x$x, x$y, :
+## conversion failure on ' (WT / rim15Δ)' in 'mbcsToSbcs': dot substituted for <94>
+```
 
-collect sequence window for significantly changed pSites estimated by ttest
-===========================================================================
+#collect sequence window for significantly changed pSites estimated by ttest
 
-``` r
+```r
 ratio_sequence <- phosphosites %>%
   dplyr::select(Proteins, id, `Positions within proteins`,`Leading proteins`,`Protein names`,`Gene names`,`Fasta headers`, `Localization prob`, `Sequence window`) %>%
   dplyr::select(Proteins, id, `Positions within proteins`,`Leading proteins`,`Protein names`,`Gene names`,`Fasta headers`, `Localization prob`,`Sequence window`) %>%
@@ -1890,9 +2400,9 @@ pie(slices, labels = slices_labels,
    main="Distribution of Phosphosites\n with S/TQ motif (all phosphosites)", col =c("#DCDCDC", "#696969"))
 ```
 
-![](README_figs/README-motif%20search-1.png)
+![](Build_in_ratios_files/figure-html/motif search-1.png)<!-- -->
 
-``` r
+```r
 ##runs motifx
 
 library(rmotifx)
@@ -1905,11 +2415,13 @@ motif_P<-motifx(fg_P$motif, ratio_sequence_motif$motif, central.res = "S", min.s
 motif_P
 ```
 
-    ##     motif    score fg.matches fg.size bg.matches bg.size fold.increase
-    ## 1 ...SP.. 4.205950         13      25        716    4237      3.077151
-    ## 2 ...S.D. 1.717744          5      12        500    3521      2.934167
+```
+##     motif    score fg.matches fg.size bg.matches bg.size fold.increase
+## 1 ...SP.. 4.205950         13      25        716    4237      3.077151
+## 2 ...S.D. 1.717744          5      12        500    3521      2.934167
+```
 
-``` r
+```r
 fg_C <- sig_logFC_ttest_pS_motif %>%
   dplyr::filter(nutrient == "C")
 #for only in pph3
@@ -1917,12 +2429,13 @@ motif_C<-motifx(fg_C$motif, ratio_sequence_motif$motif, central.res = "S", min.s
 motif_C
 ```
 
-    ## NULL
+```
+## NULL
+```
 
-merge protein Groups wiht pSite
--------------------------------
+##merge protein Groups wiht pSite
 
-``` r
+```r
 logFC_ttest <- left_join(logFC_ttest_pS, logFC_ttest_pG, by = c("Protein names","Gene names","Fasta headers","nutrient","time"), suffix = c(".phospho",".protein"))
 
 ggplot(data=logFC_ttest, aes(x=log2FC.protein, y =log2FC.phospho)) +
@@ -1944,6 +2457,12 @@ ggplot(data=logFC_ttest, aes(x=log2FC.protein, y =log2FC.phospho)) +
   theme(legend.position="none")
 ```
 
-    ## Warning: Removed 10049 rows containing missing values (geom_point).
+```
+## Warning: Removed 10049 rows containing missing values (geom_point).
+```
 
-![](README_figs/README-unnamed-chunk-9-1.png)
+![](Build_in_ratios_files/figure-html/unnamed-chunk-8-1.png)<!-- -->
+
+
+
+
