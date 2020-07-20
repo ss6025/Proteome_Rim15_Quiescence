@@ -1,0 +1,126 @@
+---
+title: "linearnility check for protein and pSites"
+output: html_notebook
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(collapse=TRUE, comment="##", fig.retina=2, fig.path = "README_figs/README-")
+```
+
+Load packages
+```{r, include=FALSE}
+library(dplyr)
+library(ggplot2)
+library(reshape2)
+library(tidyverse)
+library(GGally)
+library(ggpubr)
+library(ggrepel)
+library(gridExtra)
+library(devtools)
+library(ggfortify)
+library(limma)
+library(plotly)
+library(broom)
+library(rmotifx)
+library(pheatmap)
+```
+
+Read in tables
+```{r}
+proteome_ratio<-read_csv("./tables/normed_ratio_perseus.csv")
+proteome_int<-read_csv("./tables/geoMean_normed_intensity.csv") # in a tidy version already
+```
+
+Look at protein intensity and ratio on the same plot but 
+```{r}
+###combine both intensity and ratio in the same table 
+##reshape ratio table
+ratio_tidy <- melt(proteome_ratio) %>%
+  separate(variable, c("genotype", "nutrient", "samplingTime", "replicate"), sep = "_") %>%
+  filter(genotype != "WT/rim15KO")
+##join table
+proteome <- inner_join(ratio_tidy, proteome_int, by = c("Gene names","genotype","nutrient","samplingTime","replicate"))
+```
+
+Make plot on one example gene 
+```{r}
+IGO1 <- proteome %>% filter(`Gene names` == "IGO1") %>%
+  transform(genotype=factor(genotype,levels=c("WT","rim15KO")))
+
+#plot both on the same plot
+#caculate the scalefactor
+scaleFactor <- max(IGO1$value) / max(IGO1$normalized_intensity)
+protein = "IGO1"
+ggplot(IGO1, aes(x=samplingTime)) +
+  geom_smooth(aes(y=value, group = genotype), method="lm", col = "#eb4034") +
+  geom_point(aes(y=value), col = "#eb4034")+
+  geom_smooth(aes(y=normalized_intensity * scaleFactor, group = genotype), method="lm", col = "#34a2eb") +
+  geom_point(aes(y=normalized_intensity * scaleFactor), col = "#34a2eb")+
+  facet_grid(nutrient~genotype)+
+  scale_y_continuous(name="Normalized ratio", sec.axis=sec_axis(~./scaleFactor, name="Normalized intensity"))  +
+  theme(axis.title.y = element_text(color = "#eb4034", size=13),
+    axis.ticks.y = element_line(color = "#eb4034"),
+    axis.text.y = element_text(color = "#eb4034"), 
+    axis.title.y.right = element_text(color = "#34a2eb", size=13),
+    axis.ticks.y.right = element_line(color = "#34a2eb"),
+    axis.text.y.right = element_text(color = "#34a2eb"),
+    panel.background = element_blank(),
+    axis.line.x = element_line(colour = "black"),
+    axis.line.y = element_line(colour = "#eb4034"),
+    axis.line.y.right = element_line(colour = "#34a2eb"))+
+  ggtitle(protein)
+```
+
+Map the function to each gene
+```{r}
+protein_list <- unique(proteome$`Gene names`)
+plot_list = list()
+for (i in 1:length(protein_list)) {
+  protein <- proteome %>% filter(`Gene names` == protein_list[i]) %>%
+  transform(genotype=factor(genotype,levels=c("WT","rim15KO")))
+  
+  scaleFactor <- max(protein$value, na.rm = TRUE) / max(protein$normalized_intensity)
+  
+  p <- ggplot(protein, aes(x=samplingTime)) +
+  geom_smooth(aes(y=value, group = genotype), method="lm", col = "#eb4034") +
+  geom_point(aes(y=value), col = "#eb4034")+
+  geom_smooth(aes(y=normalized_intensity * scaleFactor, group = genotype), method="lm", col = "#34a2eb") +
+  geom_point(aes(y=normalized_intensity * scaleFactor), col = "#34a2eb")+
+  facet_grid(nutrient~genotype, scale = "free")+
+  scale_y_continuous(name="Normalized ratio", sec.axis=sec_axis(~./scaleFactor, name="Normalized intensity"))  +
+  theme(axis.title.y = element_text(color = "#eb4034", size=13),
+    axis.ticks.y = element_line(color = "#eb4034"),
+    axis.text.y = element_text(color = "#eb4034"), 
+    axis.title.y.right = element_text(color = "#34a2eb", size=13),
+    axis.ticks.y.right = element_line(color = "#34a2eb"),
+    axis.text.y.right = element_text(color = "#34a2eb"),
+    panel.background = element_blank(),
+    axis.line.x = element_line(colour = "black"),
+    axis.line.y = element_line(colour = "#eb4034"),
+    axis.line.y.right = element_line(colour = "#34a2eb"))+
+  ggtitle(protein_list[i])
+
+  plot_list[[i]] = p
+}
+
+ggsave(
+   filename = "./plots/individual_plots_protein.pdf", 
+   plot = marrangeGrob(plot_list, nrow=4, ncol=2), 
+   width = 15, height = 10
+)
+
+#create pdf where each page is a separate plot.
+pdf("./plots/individual_plots_protein.pdf")
+for (i in 1:length(protein_list)) {
+  par(mfrow = c(2, 4))
+  print(plot_list[[i]])
+}
+dev.off()
+```
+Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
+
+When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
+
+The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
+
