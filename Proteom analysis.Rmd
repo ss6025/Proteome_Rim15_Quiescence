@@ -11,8 +11,7 @@ output:
 knitr::opts_chunk$set(collapse=TRUE, comment="##", fig.retina=2, fig.path = "README_figs/README-")
 ```
 
-#read in files
-#load packages
+Load packages
 ```{r, include = FALSE}
 library(dplyr)
 library(ggplot2)
@@ -30,7 +29,7 @@ library(broom)
 library(pheatmap)
 ```
 
-#read in protein files
+Read in protein files
 ```{r , include = FALSE}
 #set working directory
 #read in protein groups 

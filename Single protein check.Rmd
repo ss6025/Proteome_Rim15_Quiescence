@@ -41,13 +41,23 @@ ratio_tidy <- melt(proteome_ratio) %>%
   filter(genotype != "WT/rim15KO")
 ##join table
 proteome <- inner_join(ratio_tidy, proteome_int, by = c("Gene names","genotype","nutrient","samplingTime","replicate"))
+
+write_csv(proteome, "./tables/proteinTable.csv")
 ```
 
 Make plot on one example gene 
 ```{r}
-IGO1 <- proteome %>% filter(`Gene names` == "IGO1") %>%
+IGO1 <- proteome %>% filter(`Gene names` == "ERV2") %>%
   transform(genotype=factor(genotype,levels=c("WT","rim15KO")))
 
+proteome <- proteome %>%
+  group_by(`Gene names`) %>%
+  #count the number of na values
+  mutate(ind = sum(is.na(value))) %>% 
+  #remove the proteins who has NA value in all conditions and samples
+  filter(!any(ind ==48)) %>%
+  select(-ind)
+  
 #plot both on the same plot
 #caculate the scalefactor
 scaleFactor <- max(IGO1$value) / max(IGO1$normalized_intensity)
@@ -104,23 +114,5 @@ for (i in 1:length(protein_list)) {
   plot_list[[i]] = p
 }
 
-ggsave(
-   filename = "./plots/individual_plots_protein.pdf", 
-   plot = marrangeGrob(plot_list, nrow=4, ncol=2), 
-   width = 15, height = 10
-)
-
-#create pdf where each page is a separate plot.
-pdf("./plots/individual_plots_protein.pdf")
-for (i in 1:length(protein_list)) {
-  par(mfrow = c(2, 4))
-  print(plot_list[[i]])
-}
-dev.off()
+ggsave(filename = "./plots/individual_plots_protein.pdf", plot = marrangeGrob(plot_list, nrow=4, ncol=3), width = 15, height = 10)
 ```
-Add a new chunk by clicking the *Insert Chunk* button on the toolbar or by pressing *Cmd+Option+I*.
-
-When you save the notebook, an HTML file containing the code and output will be saved alongside it (click the *Preview* button or press *Cmd+Shift+K* to preview the HTML file). 
-
-The preview shows you a rendered HTML copy of the contents of the editor. Consequently, unlike *Knit*, *Preview* does not run any R code chunks. Instead, the output of the chunk when it was last run in the editor is displayed.
-
