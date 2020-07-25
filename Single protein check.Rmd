@@ -45,6 +45,24 @@ proteome <- inner_join(ratio_tidy, proteome_int, by = c("Gene names","genotype",
 write_csv(proteome, "./tables/proteinTable.csv")
 ```
 
+#remove rows with na values in all df
+```{r}
+tidy_master_ratio <- tidy_master_ratio %>%
+  select(-c("Protein names","Fasta headers","ORF")) %>%
+  melt() %>%
+  group_by(`Protein IDs`,`Gene names`,genotype, nutrient, samplingTime, replicate) %>%
+  #count the number of na values
+  mutate(ind = sum(is.na(value))) %>% 
+  #remove the proteins who has NA value in all conditions and samples
+  filter(!any(ind ==4)) %>%
+  select(-ind)
+
+tmp<-tidy_master_ratio %>% spread(key = variable, value = value)
+  
+write_csv(tmp, "./tables/master_tidy_protein.csv")
+```
+
+
 Make plot on one example gene 
 ```{r}
 IGO1 <- proteome %>% filter(`Gene names` == "ERV2") %>%

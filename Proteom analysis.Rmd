@@ -36,6 +36,78 @@ Read in protein files
 proteinGroups <- read_csv("./data/proteinGroups.csv")
 ```
 
+Save ratios, normalized ratios and intensities into different data frames in tidy version
+```{r}
+#extract the proteome info
+ratio <- proteinGroups %>% 
+  #select columns that contains the useful information - based on the experiments setups
+  dplyr::select(`Protein IDs`, `Gene names`,`Protein names`, `Fasta headers`, contains("Ratio")) %>%
+  dplyr::select(`Protein IDs`, `Gene names`, `Protein names`, `Fasta headers`, contains("proteome")) %>%
+  #dplyr::select(`Protein IDs`, `Gene names`, `Protein names`, `Fasta headers`, contains("normalized")) %>%
+  #remove columns that is not important
+  dplyr::select(-matches("_N_")) %>% 
+  dplyr::select(-contains("variability")) %>%
+  dplyr::select(-contains("normalized")) %>%
+  dplyr::select(-contains("count")) %>%
+  dplyr::select(-contains("iso-count")) %>%
+  dplyr::select(-contains("type"))
+
+#extract data for time 0
+T00_P <- ratio %>% dplyr::select(`Protein IDs`, `Gene names`,`Protein names`, `Fasta headers`, contains("T00")) %>% 
+  dplyr::rename(`Ratio M/L proteome_P_T00_R1` = `Ratio M/L proteome_C_T00_R1`,
+         `Ratio M/L proteome_P_T00_R2` = `Ratio M/L proteome_C_T00_R2`,
+         `Ratio M/L proteome_P_T00_R3` = `Ratio M/L proteome_C_T00_R3`,
+         `Ratio H/L proteome_P_T00_R1` = `Ratio H/L proteome_C_T00_R1`,
+         `Ratio H/L proteome_P_T00_R2` = `Ratio H/L proteome_C_T00_R2`,
+         `Ratio H/L proteome_P_T00_R3` = `Ratio H/L proteome_C_T00_R3`,
+         `Ratio H/M proteome_P_T00_R1` = `Ratio H/M proteome_C_T00_R1`,
+         `Ratio H/M proteome_P_T00_R2` = `Ratio H/M proteome_C_T00_R2`,
+         `Ratio H/M proteome_P_T00_R3` = `Ratio H/M proteome_C_T00_R3`)
+
+ratio_add<- dplyr::inner_join(ratio, T00_P, by = c("Protein IDs","Gene names","Protein names","Fasta headers"))
+  
+#reshape the table into a tidy format 
+ratio_tidy <- melt(ratio_add) %>%
+  separate(variable, c("signal","channel","sampleNum"), sep = " ") %>%
+  separate(sampleNum, c("omic","nutrient","samplingTime","replicate"), sep = "_") %>%
+  dplyr::select(-c("signal","omic"))  %>%
+  rename(ratio = value) %>%
+  #select only wild type and ko ratios individually
+  dplyr::filter(channel %in% c("H/L","M/L"))
+
+##reversed build-in ratio by genotypes
+##switch H/L to M/L
+rep2_HL_ML <- ratio_tidy %>% 
+  dplyr::filter(channel == "H/L" & replicate == "R2" & nutrient == "P") %>%
+  mutate(channel="M/L")
+##switch M/L to H/L
+rep2_ML_HL <- ratio_tidy %>% 
+  dplyr::filter(channel == "M/L" & replicate == "R2" & nutrient == "P") %>%
+  mutate(channel="H/L")
+
+##combine all new replicate 2 data
+rep2 <- bind_rows(rep2_HL_ML, rep2_ML_HL)
+
+#join the revised replicate 2 with the other data from replicate 1&3
+#remove old data
+new_re <- anti_join(ratio_tidy,ratio_tidy %>% dplyr::filter (nutrient == "P" & replicate == "R2"))
+
+ratio_tidy_re <- bind_rows(rep2, new_re) %>%
+  mutate(channel=replace(channel, channel=="M/L", "rim15KO")) %>%
+  mutate(channel=replace(channel, channel=="H/L", "WT")) %>%
+  mutate(channel=replace(channel, channel=="H/M", "WT/rim15KO")) %>%
+  dplyr::rename(genotype = channel)
+  #replace NA values with 1, which assuming there is no changes
+    #mutate(value = if_else(is.na(value), 1, value))
+```
+
+###Make a table containing all informations: intensity, normalized_intensity, ratios, normalized_ratios
+```{r}
+#read in the normalized ratio and intensity table from single protein check.Rmd
+proteome <- read_csv("./tables/proteinTable.csv")
+tidy_master_ratio<- left_join(ratio_tidy_re, proteome %>% rename (normalized_ratio = value))
+```
+
 #normalized ratios 
 #add the corresponding attributes for time 0 in each condition
 ##build in ratio from Maxquant, un-normalized
