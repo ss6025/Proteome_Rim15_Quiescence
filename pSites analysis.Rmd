@@ -347,7 +347,7 @@ pSite_tidy <- melt(pSite) %>%
 relative_pS <- pSite_tidy %>% unite(cond, genotype, nutrient, replicate) %>%
   drop_na() %>%
   spread(key = samplingTime, value = value) %>%
-  mutate(`T00/T00` = T00-T00, `T06/T00` = T06-T00, `T16/T00` = T16-T00, `T30/T00` = T30-T00) %>%
+  mutate(`T00/T00` = T00/T00, `T06/T00` = T06/T00, `T16/T00` = T16/T00, `T30/T00` = T30/T00) %>%
   melt() %>%
   separate(cond, c("genotype","nutrient","replicate"), sep = "_") 
 
@@ -391,7 +391,7 @@ log2FC_pS <- pS_filtered %>%
   melt() %>%
   separate(variable, c("genotype","replicate")) %>%
   group_by(`Proteins`, `Leading proteins`, `Protein names`,`Gene names`, pSite, `Fasta headers`, nutrient, time) %>%
-  summarise_each(funs(mean(.[genotype=="WT"], na.rm=TRUE)-mean(.[genotype == "rim15KO"], na.rm=TRUE)), log2FC = value)
+  summarise_each(funs(log2(mean(.[genotype=="WT"], na.rm=TRUE)-mean(.[genotype == "rim15KO"], na.rm=TRUE))), log2FC = value)
 
 logFC_ttest_pS <-left_join(ttest_pS, log2FC_pS, by = c( "Proteins", "Leading proteins", "Protein names", "Gene names","pSite","Fasta headers", "nutrient","time")) %>%
     mutate(qvalue = round(qvalue, digits = 4))
@@ -418,7 +418,6 @@ show_trehelose<-logFC_ttest_pS %>%
 show <- logFC_ttest_pS %>% 
     dplyr::filter(pSite %in% c("IGO1_64","SUI3_92","TIF5_189","TIF5_190","FUN12_386","DPS1_14","TIF4631_163","DPS1_14","HCR1_65","SEC16_1760","EAP1_391", "TPS3_148","TSL1_73","TSL1_155","TSL1_147","CUE5_50","YRB1_60","BRE5_282","BLM10_62")) %>%
     dplyr::filter(nutrient == "P")
-#  mutate(qvalue = round(qvalue, digits = 4))
 
 ggplot(data=logFC_ttest_pS%>% dplyr::filter(nutrient == "P"), aes(x=log2FC, y =-log10(qvalue))) +
   geom_point(data=dplyr::filter(logFC_ttest_pS, qvalue > 0.05,nutrient == "P"), alpha = 1/6, size = 0.8) +
@@ -427,9 +426,7 @@ ggplot(data=logFC_ttest_pS%>% dplyr::filter(nutrient == "P"), aes(x=log2FC, y =-
 c("#e7b800")) +
   theme_classic() +
   coord_fixed(ratio = 6)+
-  #geom_text_repel(data = dplyr::filter(logFC_ttest_pS, nutrient == "P", log2FC > 2, qvalue < 0.05), aes(label = pSite), size =2.5,hjust = 0, nudge_x = 0.05,direction = "y",segment.size = 0.2) +
- #geom_text_repel(data = dplyr::filter(logFC_ttest_pS,nutrient == "P",  log2FC < -2, qvalue < 0.05), aes(label = pSite), size =2.5,hjust = 1, nudge_x = 0.5,direction = "y",segment.size = 0.2) +
-xlab(expression(Log[2]*" (WT / rim15Δ)")) +
+  xlab(expression(Log[2]*" (WT / rim15Δ)")) +
   ylab(expression(-Log[10]* "(qvalue)")) +
   xlim(-2.5,6.5)+
   ylim(0,2)+
@@ -780,3 +777,4 @@ pSite_sum_nutrient %>%
   xlab("Hours post nutrient limitation") +
   ylab("Number of phosphorylation sites (p.adj<0.05)")
 ```
+        
